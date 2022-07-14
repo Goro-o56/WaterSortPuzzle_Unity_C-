@@ -23,8 +23,6 @@ public class TubeManager : MonoBehaviour
         children = getChildren(parent);
 
         //ソート
-        int  Top_Y = parent.transform.childCount;
-
         Sort(children);
 
 
@@ -52,15 +50,11 @@ public class TubeManager : MonoBehaviour
 
 
         //合成してズレた分を直す
-        int  Top_Y = parent.transform.childCount;
-        float delta = reform_endArrElement(endArr, Top_Y);
-        if(delta == 0) {
-            //
-            declineByDelta(10);
-        }else{
-            declineByDelta(delta);
-        }
-
+        float  Top_Y = SetTopY(children);
+        Debug.Log($"{Top_Y}に合わせます");
+        reform_endArrElement(endArr, Top_Y);
+      
+        //
     
     }
         //getChildren
@@ -152,7 +146,7 @@ public class TubeManager : MonoBehaviour
             return endArr;
         }
 
-        float reform_endArrElement(Transform[] endArr, int Top_Y){
+        void reform_endArrElement(Transform[] endArr, float Top_Y){
             float difference = 0.5f; 
             int cnt_2 = 0; //削除した回数
 
@@ -181,26 +175,34 @@ public class TubeManager : MonoBehaviour
                 tmp_1.y = Top_Y - difference * cnt_2;
                 endArr[0].transform.localPosition = tmp_1;
             }
-            Debug.Log($"cnt = {cnt_2}");
-            Debug.Log($"");
-            Debug.Log($"");
-            float delta = difference * cnt_2 - Top_Y*cnt_2;
-            return delta;
-            
-        }
-        void declineByDelta(float delta){
-            //delta分子要素を全体的に下げる
-            children = getChildren(parent);
-            
-            int cnt = 0;
+ 
+ 
+       }
+
+        float SetTopY(Transform[] children){
+            //TopYを返す
+
+            float sumTopY = 0f;
+            int cnt=0;
+            float[] tmpArr;
+            tmpArr = new float[parent.transform.childCount]; 
             foreach(Transform child in children){
-                Vector3 tmpVec;
-                tmpVec = child.transform.localPosition;
-                tmpVec.y = tmpVec.y - delta;
-                Debug.Log($"{delta}分下げます");
-                child.transform.localPosition = tmpVec;
-                cnt ++;
+                float tmpTopY;
+                tmpTopY = child.transform.localScale.y;
+                tmpArr[cnt] = tmpTopY;
+                cnt++;
             }
+
+            int i = 0;
+            while(i < cnt){
+                sumTopY += tmpArr[i];
+            }
+            Debug.Log($"{sumTopY}が基準になります");
+
+            return sumTopY;
+        }
+        void SetByTopY(float Top_Y,Transform[] children){
+
         }
 
         //Touch
