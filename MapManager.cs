@@ -24,6 +24,7 @@ public class MapManager : MonoBehaviour
     }
 
 
+
     public void callonEvent(){
         children = getChildren(parent);
         scripts = getScriptArr(children);
@@ -64,6 +65,38 @@ public class MapManager : MonoBehaviour
             count++;
         }
         return children; 
+    }
+
+        //bool値に対して処理をするような関数
+    public Transform start_obj;
+    public List<Transform> end_obj = new List<Transform>();
+
+    void SetTubeByBool(bool Bool,Transform tmpObj, Transform start_obj,Transform end_obj){
+        //start_objに何も入ってない
+
+        if(start_obj == null) {
+            start_obj = tmpObj;
+        }
+        else if(start_obj != null){
+            if (end_obj == null){
+                end_obj = tmpObj;
+                //move
+                moveTube(start_obj,end_obj);
+            }
+        }
+    }
+
+    void moveTube(Transform start_obj, Transform end_obj){
+        //一番上の者をend_objに持ってくる
+        Transform tmpObj = start_obj.root;
+        //それをend_objの一番上に代入する。
+        Instantiate(tmpObj, start_obj);
+        Destroy(start_obj.root);
+    }
+
+    void Init(Transform start_obj, Transform end_obj){
+        start_obj = null;
+        end_obj = null;
     }
 
 }
