@@ -10,10 +10,21 @@ public class TubeManager : MonoBehaviour
     public GameObject parent;
     //配列作成
     Transform[] children;
+        
+    public bool click_state;
     
-
     public void onClickAct(){
-        //Debug.Log("Tubeがタッチされた");
+        Debug.Log($"{click_state}が今の状態です");
+        if(click_state==true){
+            click_state = false;
+            Debug.Log("falseにしました");
+            return;
+        }
+        if(click_state==false){
+            click_state = true;
+            Debug.Log("trueにしました");
+            return;
+        }
     }
 
     // Start is called before the first frame update
@@ -24,38 +35,27 @@ public class TubeManager : MonoBehaviour
 
         //ソート
         Sort(children);
+        //重複要素を合成する
+        int counter;
+        Transform[] tmpArr;
+        tmpArr = new Transform[parent.transform.childCount];
+        counter = Check(tmpArr);
+
+        Transform[] endArr;
+        endArr = new Transform[counter];
+        endArr = compressArr(tmpArr, endArr,counter);
+        
+        float Top_Y;
+        //children = getChildren(parent);
+        Top_Y = SetTopY(children);
+        reform_endArrElement(endArr, Top_Y);
 
 
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        children = getChildren(parent);
-        //チェック
-        int counter;
-        Transform[] tmpArr; 
-        tmpArr = new Transform[parent.transform.childCount];
-        counter = Check(tmpArr);
-
-        //tmpArrをテストする
-        Test_tmpArr(tmpArr,counter);
-
-
-        //圧縮配列を作る
-        //Debug.Log($"{counter}の長さの配列を作ります");
-        Transform[] endArr; //要素を圧縮するための配列
-        endArr = new Transform[counter];
-        endArr = compressArr(tmpArr,endArr,counter); 
-
-
-        //合成してズレた分を直す
-        float  Top_Y = SetTopY(children);
-        Debug.Log($"{Top_Y}に合わせます");
-        reform_endArrElement(endArr, Top_Y);
-      
-        //
-    
+    void Update(){
+ 
     }
         //getChildren
         Transform[] getChildren(GameObject parent){
@@ -78,9 +78,9 @@ public class TubeManager : MonoBehaviour
             int cnt = 0;
 
             while(cnt < parent.transform.childCount){
-                //Vector3 pos = transform.localPosition; //何かここがおかしいっぽい
-                Vector3 pos = new Vector3(0,0,0);
-                pos.y =  Top_Y - scale_y * cnt;
+                Vector3 pos = children[cnt].transform.localPosition; //何かここがおかしいっぽい
+                //Vector3 pos = new Vector3(0,0,0);
+                pos.y =  Top_Y/2 - scale_y * cnt -0.5f;
                 children[cnt].transform.localPosition = pos;
                 cnt++;
             }
@@ -159,21 +159,24 @@ public class TubeManager : MonoBehaviour
                 endArr[0].transform.localScale = tmp;
                 
                 //1から最後までの要素を削除する
-                int cnt_1 = 1; //endArr要素を指定するインデックス
 
 
-                while(cnt_1 < endArr.Length){
-                    Destroy(endArr[cnt_1].gameObject);
-                    cnt_2++;
-                    cnt_1++;
+                for (int i = 0 ; i < endArr.Length; i++) {
+                    if (i==0){
+                        
+                    }else{
+                        Destroy(endArr[i].gameObject);
+                        cnt_2++;
+                    }
                 }
 
                 //合成した分*0.5 下げて離れた分くっつける
                    
                 Vector3 tmp_1 ;
                 tmp_1 = endArr[0].transform.localPosition;
-                tmp_1.y = Top_Y - difference * cnt_2;
+                tmp_1.y = tmp_1.y - difference * cnt_2;
                 endArr[0].transform.localPosition = tmp_1;
+                Debug.Log($"{difference * cnt_2}分下げました");
             }
  
  
@@ -186,6 +189,7 @@ public class TubeManager : MonoBehaviour
             int cnt=0;
             float[] tmpArr;
             tmpArr = new float[parent.transform.childCount]; 
+            
             foreach(Transform child in children){
                 float tmpTopY;
                 tmpTopY = child.transform.localScale.y;
@@ -196,10 +200,12 @@ public class TubeManager : MonoBehaviour
             int i = 0;
             while(i < cnt){
                 sumTopY += tmpArr[i];
+                i++;
             }
+           
             Debug.Log($"{sumTopY}が基準になります");
 
-            return sumTopY;
+            return sumTopY - 0.5f;
         }
         void SetByTopY(float Top_Y,Transform[] children){
 
@@ -216,35 +222,5 @@ public class TubeManager : MonoBehaviour
 
 
 
-
-}
-
-public class Tube{ //クラス作ってみたが、アタッチされていないので呼び出せない
-    public GameObject parent;
-
-    Transform[] children;
-    int count;
-
-    public Tube (GameObject Parent, Transform[] Children){
-        parent = Parent;
-        children = Children;
-        count = 0;
-    }
-
-    public void getChildren(){
-        foreach(Transform child in parent.transform){
-            children[count] = child;
-            //Debug.Log($"{count}番目の子供は{children[count].name}です");
-            count++;
-        }
-    }
-    
-}
-
-//子オブジェクトの存在を確認するクラス
-public static partial class TransformExtensions {
-    public static bool HasChild(this Transform transform){
-        return 0 < transform.childCount;
-    }
 
 }
