@@ -14,15 +14,15 @@ public class TubeManager : MonoBehaviour
     public bool click_state;
     
     public void onClickAct(){
-        Debug.Log($"{click_state}が今の状態です");
+        //Debug.Log($"{click_state}が今の状態です");
         if(click_state==true){
             click_state = false;
-            Debug.Log("falseにしました");
+            //Debug.Log("falseにしました");
             return;
         }
         if(click_state==false){
             click_state = true;
-            Debug.Log("trueにしました");
+            //Debug.Log("trueにしました");
             return;
         }
     }
@@ -206,20 +206,8 @@ public class TubeManager : MonoBehaviour
             Debug.Log($"{sumTopY}が基準になります");
 
             return sumTopY - 0.5f;
+        
         }
-        void SetByTopY(float Top_Y,Transform[] children){
-
-        }
-
-        //Touch
-        void TouchManager() {
-
-        }
-
-        void Reposition(Transform[] children){ //childrenを、親オブジェクトの相対座標通りに配置し直す
-
-        }
-
 
 
 

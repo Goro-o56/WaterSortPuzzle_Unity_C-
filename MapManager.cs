@@ -24,15 +24,75 @@ public class MapManager : MonoBehaviour
     }
 
 
-
+    
     public void callonEvent(){
-        children = getChildren(parent);
+        children = getChildren(parent); //Tube_i (i:1,2,3,...)が配列になっている
         scripts = getScriptArr(children);
-        int cnt = 0;
+        int cnt = 0; //Tubeのindexと同じ
         foreach(TubeManager script in scripts){
             bool tmpBool = watchScriptsBool(scripts, cnt);
+            if(tmpBool == true){
+                //もし空なら代入していい。 空でないなら別の呼び出し
+                if(this.start_Tube == null){
+                    
+                    this.start_Tube = children[cnt];
+                    Debug.Log("startTubeが設定されました");
+                    return;
+                }
+                else if(this.start_Tube != null) {
+                    
+                    //Tubeの中身を入れた配列
+                    Transform[] tmpTube;
+                    Debug.Log("endTubeが設定されました");
+                    tmpTube = new Transform[children[cnt].childCount]; //Tubeの中身
+                    int j = 0;
+                    foreach(Transform Liquid in tmpTube) {
+                        tmpTube[j] = children[cnt].GetChild(j);
+                        j++;
+                    }
+                    //start_Tubeからend_Tubeに代入する
+                    //まずstart_Tubeを参照する準備tmpArr[0]で指定出来る
+                    Transform[] tmpArr;
+                    tmpArr = new Transform[start_Tube.childCount];
+                    tmpArr = setArray(start_Tube, tmpArr);
 
-            Debug.Log($"{cnt}番目のTubeは{tmpBool}");
+                    //tmpArr[0]をchildren[cnt]の一番上に追加する
+                    Transform[] copyArr;
+                    copyArr = new Transform[children[cnt].childCount + 1];
+
+
+                    //null,children[0],children[1],  ...という形の配列を作る
+                    int i = 0;
+                    foreach(Transform Liquid in tmpTube ){
+                        if(i == 0){
+                            copyArr[0] = tmpArr[0];
+                            Debug.Log($"{tmpArr[0]}を代入した");
+                        }
+                        else{
+                            copyArr[i] = Liquid;
+                            Debug.Log($"{Liquid}が代入されました");
+                        }
+                    }
+
+                    //削除 代入
+                    //children[cnt]の中身を削除、copyArrの中身を代入
+                    int k = 0;
+                    while(k < children[cnt].childCount){
+                        Destroy(children[cnt].GetChild(k).gameObject);
+                        k++;
+                    }
+                    int l = 0;
+                    foreach(Transform element in copyArr){
+                        Instantiate(children[cnt], element);
+                        l++;
+                    }
+                    //initする start_Tube
+                    
+                    InitTransform(start_Tube);
+                    
+                    return;
+                }
+            }
             cnt++;
         }
     }
@@ -57,46 +117,32 @@ public class MapManager : MonoBehaviour
     }
 
     public Transform[] getChildren(GameObject parent){
-        children = new Transform[this.parent.transform.childCount];
+        children = new Transform[parent.transform.childCount];
 
         int count = 0;
-        foreach(Transform child in this.parent.transform) {
+        foreach(Transform child in parent.transform) {
             children[count] = child;
             count++;
         }
         return children; 
     }
 
-        //bool値に対して処理をするような関数
-    public Transform start_obj;
-    public List<Transform> end_obj = new List<Transform>();
+    //bool値に対して処理をするような関数
+    public Transform start_Tube;
+    
+    public Transform end_Tube;
+    public Transform[] start_TubeChildren;
+    public Transform[] end_TubeChildren;
 
-    void SetTubeByBool(bool Bool,Transform tmpObj, Transform start_obj,Transform end_obj){
-        //start_objに何も入ってない
-
-        if(start_obj == null) {
-            start_obj = tmpObj;
-        }
-        else if(start_obj != null){
-            if (end_obj == null){
-                end_obj = tmpObj;
-                //move
-                moveTube(start_obj,end_obj);
-            }
-        }
+    Transform[] setArray(Transform start_Tube, Transform[] tmpArr){
+       
+        tmpArr = getChildren(start_Tube.gameObject);        
+        return tmpArr;
     }
 
-    void moveTube(Transform start_obj, Transform end_obj){
-        //一番上の者をend_objに持ってくる
-        Transform tmpObj = start_obj.root;
-        //それをend_objの一番上に代入する。
-        Instantiate(tmpObj, start_obj);
-        Destroy(start_obj.root);
-    }
 
-    void Init(Transform start_obj, Transform end_obj){
-        start_obj = null;
-        end_obj = null;
+    void InitTransform(Transform transform){
+        transform = null;
     }
 
 }
