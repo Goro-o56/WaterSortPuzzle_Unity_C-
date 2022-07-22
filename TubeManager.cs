@@ -13,18 +13,27 @@ public class TubeManager : MonoBehaviour
         
     public bool click_state;
     
+    public GameObject refParent; //MapManagerから参照されるParentObject
     public void onClickAct(){
         //Debug.Log($"{click_state}が今の状態です");
         if(click_state==true){
             click_state = false;
+            refParent=null;
             //Debug.Log("falseにしました");
             return;
         }
         if(click_state==false){
             click_state = true;
             //Debug.Log("trueにしました");
+            refParent = onClickReturnObject(parent);//tmpParentに代入
             return;
         }
+    }
+    public GameObject onClickReturnObject(GameObject parent){
+        GameObject tmpObj;
+        Debug.Log($"{this.parent}が引数{this.refParent}に代入されます。");
+        tmpObj = this.parent;
+        return tmpObj;
     }
 
     // Start is called before the first frame update
@@ -203,7 +212,7 @@ public class TubeManager : MonoBehaviour
                 i++;
             }
            
-            Debug.Log($"{sumTopY}が基準になります");
+            //Debug.Log($"{sumTopY}が基準になります");
 
             return sumTopY - 0.5f;
         

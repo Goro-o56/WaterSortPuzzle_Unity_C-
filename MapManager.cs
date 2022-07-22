@@ -26,75 +26,85 @@ public class MapManager : MonoBehaviour
 
     
     public void callonEvent(){
-        children = getChildren(parent); //Tube_i (i:1,2,3,...)が配列になっている
+        children = getChildren(parent); //Tube_i (i:0,1,2,3,...)が配列になっている
+        //script = getScript()
         scripts = getScriptArr(children);
-        int cnt = 0; //Tubeのindexと同じ
-        foreach(TubeManager script in scripts){
-            bool tmpBool = watchScriptsBool(scripts, cnt);
-            if(tmpBool == true){
-                //もし空なら代入していい。 空でないなら別の呼び出し
-                if(this.start_Tube == null){
-                    
-                    this.start_Tube = children[cnt];
-                    Debug.Log("startTubeが設定されました");
+        bool[] boolArray = new bool[scripts.Length];
+        //scriptsが格納される順番は i = 0,1,2,3,...
+        for(int i = 0; i < scripts.Length; i++){
+            boolArray[i] = scripts[i].click_state;
+        }
+        //boolArrayを調べて、trueがあればi番に関して
+        for(int i = 0 ; i < boolArray.Length; i++){
+            if(boolArray[i] == true){
+                //もし,start_tubeが空なら
+                if(start_Tube == null){
+                    //startTubeに、Tube_iを代入 つまり、children[i]ということ
+                    start_Tube = children[i];
+                    Debug.Log($"start_Tubeに{start_Tube}が指定されました");
                     return;
                 }
-                else if(this.start_Tube != null) {
+                //そうでないならendTubeを指定する
+                if(start_Tube != null){
+                    end_Tube = children[i]; //参照渡しが望ましいが、どうなってるかわからない
+                    Debug.Log($"end_Tubeに{end_Tube}が指定されました"); 
                     
-                    //Tubeの中身を入れた配列
-                    Transform[] tmpTube;
-                    Debug.Log("endTubeが設定されました");
-                    tmpTube = new Transform[children[cnt].childCount]; //Tubeの中身
-                    int j = 0;
-                    foreach(Transform Liquid in tmpTube) {
-                        tmpTube[j] = children[cnt].GetChild(j);
-                        j++;
-                    }
-                    //start_Tubeからend_Tubeに代入する
-                    //まずstart_Tubeを参照する準備tmpArr[0]で指定出来る
-                    Transform[] tmpArr;
-                    tmpArr = new Transform[start_Tube.childCount];
-                    tmpArr = setArray(start_Tube, tmpArr);
+                    //ここから、移動 
+                    //まず、tmpTubeにstart_Tubeの要素をコピーしておく。
+                    Transform[] start_TubeElements;
+                    start_TubeElements = new Transform[start_Tube.childCount];
+                    Debug.Log($"start_Tubeの子を入れる配列として{start_TubeElements.Length}の長さの配列を作りました");
 
-                    //tmpArr[0]をchildren[cnt]の一番上に追加する
-                    Transform[] copyArr;
-                    copyArr = new Transform[children[cnt].childCount + 1];
+                    start_TubeElements = getChildren(start_Tube.gameObject);
 
+                    //endTubeの中身をコピーしておく。
+                    Transform[] end_TubeElements;
+                    end_TubeElements = new Transform[end_Tube.childCount];
+                    Debug.Log($"end_Tubeの子を入れる配列として{end_TubeElements.Length}の長さの配列を作りました");
+                    
+                    end_TubeElements  = getChildren(start_Tube.gameObject);
 
-                    //null,children[0],children[1],  ...という形の配列を作る
-                    int i = 0;
-                    foreach(Transform Liquid in tmpTube ){
-                        if(i == 0){
-                            copyArr[0] = tmpArr[0];
-                            Debug.Log($"{tmpArr[0]}を代入した");
+                   
+                    //end_Tubeのコピーを作って、削除=>代入する
+                    Transform[] end_TubeCopy = new Transform[end_Tube.childCount + 1];
+                    Debug.Log($"{end_TubeCopy.Length}の長さの配列を作りました");
+
+                    //end_TubeCopyは、start_TubeElements[0],children[0],...という形
+                    for(int j = 0; j < children[i].childCount + 1; j++){
+                        if(j == 0){
+                            end_TubeCopy[j] = start_TubeElements[j];
+                            Debug.Log($"0番目に{end_TubeCopy[0]}が代入されました");
                         }
-                        else{
-                            copyArr[i] = Liquid;
-                            Debug.Log($"{Liquid}が代入されました");
+                        if(j > 0){
+                            end_TubeCopy[j] = end_TubeElements[j];
+                            Debug.Log($"{end_TubeCopy}を代入した");
                         }
                     }
 
-                    //削除 代入
-                    //children[cnt]の中身を削除、copyArrの中身を代入
+                    //children[i]の全要素を削除
                     int k = 0;
-                    while(k < children[cnt].childCount){
-                        Destroy(children[cnt].GetChild(k).gameObject);
+                    foreach(Transform child in end_Tube){
+                        Destroy(child.gameObject);
+
                         k++;
                     }
+
+                    //children[i]に代入する
                     int l = 0;
-                    foreach(Transform element in copyArr){
-                        Instantiate(children[cnt], element);
+                    foreach(Transform element in end_TubeCopy){
+                        Instantiate(end_Tube, element);
                         l++;
                     }
-                    //initする start_Tube
                     
+                    //start_Tubeを削除する
                     InitTransform(start_Tube);
-                    
+                    //end_Tubeを削除
+                    InitTransform(end_Tube);
                     return;
                 }
             }
-            cnt++;
         }
+   
     }
     bool watchScriptsBool(TubeManager[] scripts, int cnt){ //scripts.boolを見て、そのbool値を返す
         bool  tmpBool;
