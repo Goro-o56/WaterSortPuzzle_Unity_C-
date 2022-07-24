@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Linq;
 public class MapManager : MonoBehaviour
 {
     //子オブジェクトを取得する
@@ -11,11 +11,13 @@ public class MapManager : MonoBehaviour
 
     TubeManager[] scripts;
 
-
+    public Stack<GameObject> TubeStack;
     // Start is called before the first frame update
     void Start()
     {
-
+        TubeStack = new Stack<GameObject>(2);
+        TubeId = defactoNull;
+        
     }
    
     // Update is called once per frame
@@ -34,82 +36,31 @@ public class MapManager : MonoBehaviour
         for(int i = 0; i < scripts.Length; i++){
             boolArray[i] = scripts[i].click_state;
         }
-        //boolArrayを調べて、trueがあればi番に関して
-        for(int i = 0 ; i < boolArray.Length; i++){
-            if(boolArray[i] == true){
-                //もし,start_tubeが空なら
-                if(start_Tube == null){
-                    //startTubeに、Tube_iを代入 つまり、children[i]ということ
-                    start_Tube = children[i];
-                    Debug.Log($"start_Tubeに{start_Tube}が指定されました");
-                    return;
-                }
-                //そうでないならendTubeを指定する
-                if(start_Tube != null){
-                    end_Tube = children[i]; //参照渡しが望ましいが、どうなってるかわからない
-                    Debug.Log($"end_Tubeに{end_Tube}が指定されました"); 
-                    
-                    //ここから、移動 
-                    //まず、tmpTubeにstart_Tubeの要素をコピーしておく。
-                    Transform[] start_TubeElements;
-                    start_TubeElements = new Transform[start_Tube.childCount];
-                    Debug.Log($"start_Tubeの子を入れる配列として{start_TubeElements.Length}の長さの配列を作りました");
 
-                    start_TubeElements = getChildren(start_Tube.gameObject);
+        //この関数はどのTubeから呼び出された？
 
-                    //endTubeの中身をコピーしておく。
-                    Transform[] end_TubeElements;
-                    end_TubeElements = new Transform[end_Tube.childCount];
-                    Debug.Log($"end_Tubeの子を入れる配列として{end_TubeElements.Length}の長さの配列を作りました");
-                    
-                    end_TubeElements  = getChildren(start_Tube.gameObject);
+        TubeDetectoronTouch(TubeId);
 
-                   
-                    //end_Tubeのコピーを作って、削除=>代入する
-                    Transform[] end_TubeCopy = new Transform[end_Tube.childCount + 1];
-                    Debug.Log($"{end_TubeCopy.Length}の長さの配列を作りました");
 
-                    //end_TubeCopyは、start_TubeElements[0],children[0],...という形
-                    for(int j = 0; j < children[i].childCount + 1; j++){
-                        if(j == 0){
-                            end_TubeCopy[j] = start_TubeElements[j];
-                            Debug.Log($"0番目に{end_TubeCopy[0]}が代入されました");
-                        }
-                        if(j > 0){
-                            end_TubeCopy[j] = end_TubeElements[j];
-                            Debug.Log($"{end_TubeCopy}を代入した");
-                        }
-                    }
-
-                    //children[i]の全要素を削除
-                    int k = 0;
-                    foreach(Transform child in end_Tube){
-                        Destroy(child.gameObject);
-
-                        k++;
-                    }
-
-                    //children[i]に代入する
-                    int l = 0;
-                    foreach(Transform element in end_TubeCopy){
-                        Instantiate(end_Tube, element);
-                        l++;
-                    }
-                    
-                    //start_Tubeを削除する
-                    InitTransform(start_Tube);
-                    //end_Tubeを削除
-                    InitTransform(end_Tube);
-                    return;
-                }
-            }
-        }
-   
     }
-    bool watchScriptsBool(TubeManager[] scripts, int cnt){ //scripts.boolを見て、そのbool値を返す
-        bool  tmpBool;
-        tmpBool = scripts[cnt].click_state;
-        return tmpBool;
+
+    
+    private int TubeId;
+   
+    private int defactoNull = 1000000;
+    public void TubeDetectoronTouch(int tmpTubeId) {
+        //これをタッチされた時にUnity側で呼び出す 
+           this.TubeId = tmpTubeId;
+    }
+
+    void NullSetTubeId(int TubeId){
+        this.TubeId = defactoNull;
+    }
+
+    GameObject watchScriptsTube(int i ){ //i番目のScriptのTubeを覗く
+        GameObject tmpObject = null;
+        tmpObject = scripts[i].refParent;
+        return tmpObject;
     }
 
     //getScriptArr

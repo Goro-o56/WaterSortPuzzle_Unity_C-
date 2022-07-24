@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 //Tubeの操作に関するクラス
 public class TubeManager : MonoBehaviour
@@ -11,28 +12,88 @@ public class TubeManager : MonoBehaviour
     //配列作成
     Transform[] children;
         
-    public bool click_state;
+    public bool click_state = false;
     
     public GameObject refParent; //MapManagerから参照されるParentObject
+
+    public Stack tmpTubeStack; 
+    public bool available;
+
+    //MapObjectの
+    public GameObject MapObject;
+ 
+    
+    //TubeStackを参照 を見る
+    MapManager getScript(GameObject MapObject){
+        MapManager script;
+        script = MapObject.GetComponent<MapManager>();
+        return script; //こっからTubeStackを見る
+    }
+    //このメソッド意味あるか？
+
+    Stack<GameObject> getStack(MapManager script){
+        Stack<GameObject> scriptStack = script.TubeStack;
+        return scriptStack;
+    }
     public void onClickAct(){
         //Debug.Log($"{click_state}が今の状態です");
-        if(click_state==true){
-            click_state = false;
-            refParent=null;
-            //Debug.Log("falseにしました");
-            return;
-        }
-        if(click_state==false){
-            click_state = true;
-            //Debug.Log("trueにしました");
-            refParent = onClickReturnObject(parent);//tmpParentに代入
-            return;
+        //if(click_state==true){
+        //    click_state = false;
+        //    refParent=null;
+        //    //Debug.Log("falseにしました");
+        //    return;
+        //}
+        // else if(click_state==false){
+        //    click_state = true;
+        //    //Debug.Log("trueにしました");
+        //    refParent = onClickReturnObject(parent);//refParentに代入
+        //    return;
+        //}
+
+        //Stackを用意
+        MapObject = GameObject.Find("Map");
+        MapManager script;
+        script = getScript(MapObject);
+        Stack<GameObject> TubeStack = script.TubeStack;
+        
+        
+        //Stackへのpush
+        
+        if(available == true){
+            //push
+            TubeStack.Push(parent);
+            Debug.Log($"{parent}がpushされました");
+            available = false;
+
+        }else if (available == false) {
+            if((TubeStack?.Count==1)){
+                //これはpopできる
+                Debug.Log($"{parent}をpopする");
+                TubeStack.Pop();
+                available = true;
+
+            }
+            else if((TubeStack?.Count == 2)) {
+                //制限として、上に物がある時はpop出来ないようにしたい parentが0番目の場合
+                if(!(TubeStack.ElementAt(1) == parent)){
+                    //popできる
+                    Debug.Log($"{parent}をpopする");
+                    TubeStack.Pop();
+                    available = true;                        
+                } 
+
+    
+
+            }
+            
+            //out => available:trueに  もし上に物があったら出せない。これはStack.Countかつparentのindexとかで拾えそう
+
         }
     }
     public GameObject onClickReturnObject(GameObject parent){
         GameObject tmpObj;
-        Debug.Log($"{this.parent}が引数{this.refParent}に代入されます。");
         tmpObj = this.parent;
+        //Debug.Log($"{this.parent}が引数{tmpObj}に代入されます。");
         return tmpObj;
     }
 
@@ -59,6 +120,7 @@ public class TubeManager : MonoBehaviour
         Top_Y = SetTopY(children);
         reform_endArrElement(endArr, Top_Y);
 
+        available = true;
 
     }
 
