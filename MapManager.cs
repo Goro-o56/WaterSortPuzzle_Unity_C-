@@ -23,6 +23,67 @@ public class MapManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Stackが満タンなら、移動
+        if(TubeStack != null){
+        if(TubeStack.Count == 2){
+            //Tube_iのGameObject
+            GameObject Start_Object;
+            GameObject End_Object;
+            Start_Object = TubeStack.ElementAt(0); 
+            Debug.Log($"{Start_Object}が代入された");
+            End_Object = TubeStack.ElementAt(1);
+            Debug.Log($"{End_Object}が代入された");
+
+            if(End_Object != null){
+                string name = End_Object.name;
+            }
+            
+            //End_Objectを削除する
+            GameObject DestroyObject = GameObject.Find($"{name}");
+            Destroy(DestroyObject);
+
+            //End_ObjectにStart_Objectの一番上を入れる
+            Transform[] StartObjectCopy = getChildren(Start_Object);
+            Transform[] EndObjectCopy = getChildren(End_Object);
+
+            Transform[] EndObjectPlusOne = new Transform[End_Object.transform.childCount + 1];
+            GameObject parentTube = new GameObject();
+
+            
+            for(int i = 0; i < End_Object.transform.childCount + 1; i++ ){
+                if (i == 0){
+                   EndObjectPlusOne[i] = StartObjectCopy[i];
+                }
+                else if (i < End_Object.transform.childCount ){
+                    EndObjectPlusOne[i] = EndObjectCopy[i];   
+                }
+            }
+
+            parentTube.name = name;
+
+            Instantiate(parentTube);
+            parentTube.transform.SetParent(this.parent.transform);
+            //parentTubeを親にする
+            int cnt = 0;
+            if((EndObjectPlusOne != null) && (parentTube != null)){
+                foreach (Transform child in EndObjectPlusOne){
+                child.SetParent(parentTube.transform);
+                cnt++;
+                }
+            }
+           
+
+            
+
+            //最後にTubeStackをクリア
+            TubeStack.Pop();
+            TubeStack.Pop();
+            return;
+
+
+            
+        }
+        }
     }
 
 
@@ -36,12 +97,6 @@ public class MapManager : MonoBehaviour
         for(int i = 0; i < scripts.Length; i++){
             boolArray[i] = scripts[i].click_state;
         }
-
-        //この関数はどのTubeから呼び出された？
-
-        TubeDetectoronTouch(TubeId);
-
-
     }
 
     
