@@ -25,6 +25,12 @@ public class MapManager : MonoBehaviour
     {
         //Stackが満タンなら、移動
         if(TubeStack != null){
+        if(TubeStack.Count == 0){
+            
+        }
+        if(TubeStack.Count == 1){
+            
+        }
         if(TubeStack.Count == 2){
             //Tube_iのGameObject
             GameObject Start_Object; //ここのParentがかわっている 
@@ -55,6 +61,11 @@ public class MapManager : MonoBehaviour
 
             Destroy(End_Object);
             CopyEnd.transform.SetParent(MapObject.transform);
+
+            //Start_Object/End_Objectのavailableをtrueにする
+            TubeManager StartScript = Start_Object.GetComponent<TubeManager>();
+            StartScript.available = true;
+
 
             //最後にTubeStackをクリア
             TubeStack.Pop();
