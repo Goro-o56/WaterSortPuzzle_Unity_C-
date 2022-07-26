@@ -76,7 +76,9 @@ public class TubeManager : MonoBehaviour
             else if((TubeStack?.Count == 2)) {
                 //制限として、上に物がある時はpop出来ないようにしたい parentが0番目の場合
                 if(!(TubeStack.ElementAt(1) == parent)){
-          
+                    Debug.Log($"{parent}をpopする");
+                    TubeStack.Pop();
+                    available = true;
                 } 
 
     
@@ -123,6 +125,8 @@ public class TubeManager : MonoBehaviour
 
     // Update is called once per frame
     void Update(){
+        children = getChildren(parent);
+        Sort(children);
  
     }
         //getChildren
