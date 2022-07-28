@@ -138,22 +138,4 @@ public class MapManager : MonoBehaviour
         return children; 
     }
 
-    //bool値に対して処理をするような関数
-    public Transform start_Tube;
-    
-    public Transform end_Tube;
-    public Transform[] start_TubeChildren;
-    public Transform[] end_TubeChildren;
-
-    Transform[] setArray(Transform start_Tube, Transform[] tmpArr){
-       
-        tmpArr = getChildren(start_Tube.gameObject);        
-        return tmpArr;
-    }
-
-
-    void InitTransform(Transform transform){
-        transform = null;
-    }
-
 }

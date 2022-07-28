@@ -102,32 +102,13 @@ public class TubeManager : MonoBehaviour
         //getChildren
         children = getChildren(parent);
 
-        //ソート
-        Sort(children);
-        //重複要素を合成する
-        int counter;
-        Transform[] tmpArr;
-        tmpArr = new Transform[parent.transform.childCount];
-        counter = Check(tmpArr);
-
-        Transform[] endArr;
-        endArr = new Transform[counter];
-        endArr = compressArr(tmpArr, endArr,counter);
-        
-        float Top_Y;
-        //children = getChildren(parent);
-        Top_Y = SetTopY(children);
-        reform_endArrElement(endArr, Top_Y);
-
         available = true;
 
+        SortObject(parent);
     }
 
     // Update is called once per frame
     void Update(){
-        children = getChildren(parent);
-        Sort(children);
- 
     }
         //getChildren
         Transform[] getChildren(GameObject parent){
@@ -144,146 +125,76 @@ public class TubeManager : MonoBehaviour
         }
 
         
-        void Sort(Transform[] children){
-            float scale_y = 1.0f;
-            float Top_Y = parent.transform.childCount;
-            int cnt = 0;
+         void SortObject(GameObject GameObject){
+            //getChildrenして、ソート
+            children = getChildren(GameObject);
+            float Top_Y = 2.5f;
+            //まずならべる
+            for(int i = 0; i < GameObject.transform.childCount; i++){
+                Debug.Log($"{i}番目の要素を並べます");
+                if(i == 0){
+                    //
+                    Vector3 tmpVec = new Vector3();
+                    tmpVec.y = Top_Y - ( children[i].transform.localScale.y - 1 ) * 0.5f;
+                    tmpVec.x = 0;
 
-            while(cnt < parent.transform.childCount){
-                Vector3 pos = children[cnt].transform.localPosition; //何かここがおかしいっぽい
-                //Vector3 pos = new Vector3(0,0,0);
-                pos.y =  Top_Y/2 - scale_y * cnt -0.5f;
-                children[cnt].transform.localPosition = pos;
-                cnt++;
-            }
-        }
-
-        //childrenをチェックしていく
-        int Check(Transform[] tmpArr){
-            
-             //parent引き継ぐ必要あるのか…？
-            //1つ1つchildrenをチェックしていく
-            int itr = 0;
-            int counter = 0;
-
-            while(itr < parent.transform.childCount){
-                //一致したら配列を入れる
-                if(children[itr].tag == children[itr+1].tag) {
-                    //Debug.Log($"{children[itr].tag}が一致しました");
-
-                    if(itr == 0) {
-                        //まず0番目をチェック
-                        //Debug.Log($"{tmpArr[itr]}に代入しています");
-                        tmpArr[itr] = children[itr];
-                        counter++;
-                        //Debug.Log($"tmpArr[itr]に{children[itr]}代入しました");
-                    }
-                tmpArr[itr+1] = children[itr+1];
-                //Debug.Log($"{children[itr+1]}を代入しました");
-                counter++;
-                itr++;
-                continue;
-                }else{
-                    break;
-                };
-            }
-            return counter;
-        }
-
-        void Test_tmpArr(Transform[] tmpArr,int counter) {
-            int cnt = 0;
-
-            //Debug.Log($"{counter}の長さの配列を作ります");
-
-            if(tmpArr.Length>0){
-                foreach(Transform child in tmpArr){
-                    //Debug.Log($"{cnt}番目");
-                    //Debug.Log($"{child}");
-                    cnt++;
+                    children[i].transform.localPosition = tmpVec;
                 }
-            }
-        }
-
-        Transform[] compressArr(Transform[] tmpArr,Transform[] endArr,int counter){
-            
-            int cnt = 0;
-            if(tmpArr.Length > 0 ){
-                //endArrに頭から入れていく
-                while(cnt < counter){
-                    endArr[cnt] = tmpArr[cnt];
-                    cnt++;
+                else if(i > 0){
+                    Vector3 tmpVec = new Vector3();
+                    tmpVec.y =children[i-1].transform.localPosition.y - children[i-1].transform.localScale.y /2 - children[i].transform.localScale.y /2;
+                    tmpVec.x = 0;
+                    
+                    children[i].transform.localPosition = tmpVec;
                 }
-            }
-
-            return endArr;
-        }
-
-        void reform_endArrElement(Transform[] endArr, float Top_Y){
-            float difference = 0.5f; 
-            int cnt_2 = 0; //削除した回数
-
-            //Debug.Log($"{endArr}を整形します");
-            if(endArr.Length > 1) {
-                //endArrの0番目の大きさを変える
-                Vector3 tmp;
-                tmp = endArr[0].transform.localScale;
-                tmp.y = tmp.y * endArr.Length;
-                endArr[0].transform.localScale = tmp;
                 
-                //1から最後までの要素を削除する
+            }
+            //決められた高さまでさげる
 
 
-                for (int i = 0 ; i < endArr.Length; i++) {
-                    if (i==0){
+
+        }
+
+         //mergeする関数。 childrenをみて、Transform[]を編集していく
+         void mergeTransforms(GameObject GameObject){
+            children = getChildren(GameObject);
+            //隣接する要素をみて、色のタグが一致するかを見る
+            int i = 0;
+
+            while (i < GameObject.transform.childCount) {
+                Transform[] tmpArr;
+                 //一次的に要素を格納する
+                if(i==0){
+                    //一致しないので、スルー
+                }
+                else if(i > 0){
+                    //一致する可能性がある
+                    if(children[i].tag == children[i - 1].tag){
+                        //一致した
+                        //ここでもう合体させてみる
+                        float len = children[i].transform.localScale.y + children[i - 1].transform.localScale.y;
+
+                        //children[i-1]の長さを編集
+                        Vector3 tmpVec = children[i-1].transform.localScale;
+                        tmpVec.y = len;
+
+                        children[i-1].transform.localScale = tmpVec;
+
+                        Destroy(children[i]);
+
                         
-                    }else{
-                        Destroy(endArr[i].gameObject);
-                        cnt_2++;
+
+
+
+                        
                     }
                 }
-
-                //合成した分*0.5 下げて離れた分くっつける
-                   
-                Vector3 tmp_1 ;
-                tmp_1 = endArr[0].transform.localPosition;
-                tmp_1.y = tmp_1.y - difference * cnt_2;
-                endArr[0].transform.localPosition = tmp_1;
-                Debug.Log($"{difference * cnt_2}分下げました");
-            }
- 
- 
-       }
-
-        float SetTopY(Transform[] children){
-            //TopYを返す
-
-            float sumTopY = 0f;
-            int cnt=0;
-            float[] tmpArr;
-            tmpArr = new float[parent.transform.childCount]; 
-            
-            foreach(Transform child in children){
-                float tmpTopY;
-                tmpTopY = child.transform.localScale.y;
-                tmpArr[cnt] = tmpTopY;
-                cnt++;
-            }
-
-            int i = 0;
-            while(i < cnt){
-                sumTopY += tmpArr[i];
+                
+                
                 i++;
             }
-           
-            //Debug.Log($"{sumTopY}が基準になります");
-
-            return sumTopY - 0.5f;
-        
-        }
+         }
 
 
-        void Sort(GameObject GameObject){
-            //
-        }
 
 }
