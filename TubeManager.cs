@@ -106,7 +106,8 @@ public class TubeManager : MonoBehaviour
 
         int counter = mergeTransforms(parent);
 
-        SortObject(parent,counter);
+        SortObject(parent, counter);
+       
     }
 
     // Update is called once per frame
@@ -128,43 +129,41 @@ public class TubeManager : MonoBehaviour
 
         
          void SortObject(GameObject GameObject,int counter){
-
+          
             //getChildrenして、ソート
             children = getChildren(GameObject);
+            
             float Top_Y = 2.5f;
-            //まずならべる
-            Debug.Log($"{children.Length-counter}--------------{parent.transform.childCount}-----------");
-            for(int i = 0; i < parent.transform.childCount - counter; i++){
-                Debug.Log($"{i}番目の要素{children[i]}を並べます");
-                if(i == 0){
-                    //
+
+
+            int tubecnt = 0;
+            foreach(Transform child in children){
+                Debug.Log($"{parent}:{child}");
+                //tubecnt == 0
+                if(tubecnt == 0){
                     Vector3 tmpVec = new Vector3();
-                    tmpVec.y = Top_Y - ( children[i].transform.localScale.y - 1 ) * 0.5f;
+                    tmpVec.y = Top_Y - (children[tubecnt].transform.localScale.y - 1 ) * 0.5f;
                     tmpVec.x = 0;
 
-                    children[i].transform.localPosition = tmpVec;
-                    
+                    children[tubecnt].transform.localPosition = tmpVec;
+                    Debug.Log($"Topは{tmpVec.y}");
                 }
-                else if(i > 0){
-                    Vector3 tmpVec = new Vector3(0,0,0);
-                    float len = children[i-1].transform.localScale.y/2 + children[i].transform.localScale.y/2;
-                    tmpVec.y =children[i-1].transform.localPosition.y - len ;
-                    Debug.Log($"{parent}{i-1}:{children[i-1]}は{children[i-1].transform.localPosition.y}");
-                    Debug.Log($"{parent}:{i}番目を{len}下げる");
-                    Debug.Log($"{tmpVec.y}が今の座標");
+                else if(tubecnt > 0){
+                    Vector3 tmpVec = new Vector3();
+                    float Top = children[tubecnt - 1].transform.localPosition.y;
+                    float len = children[tubecnt - 1].transform.localScale.y * 0.5f + children[tubecnt].transform.localScale.y * 0.5f;
+                    tmpVec.y = Top - len; 
                     tmpVec.x = 0;
-                    
-                    children[i].transform.localPosition = tmpVec;
 
+             
+
+                    Debug.Log($"{Top}---------{len}");
+                    Debug.Log($"{tmpVec.y}にyを入れます");
+                    children[tubecnt].transform.localPosition = tmpVec;
                 }
-                
+                //tubecnt != 0
+                tubecnt++;
             }
-
- 
-            //決められた高さまでさげる
-
-
-
         }
 
          //mergeする関数。 childrenをみて、Transform[]を編集していく
@@ -177,13 +176,8 @@ public class TubeManager : MonoBehaviour
             while (i < GameObject.transform.childCount) {
                
                  //一次的に要素を格納する
-                if(i==0){
-                    //一致しないので、スルー
-                    i++;
-            
 
-                }
-                else if(i > 0){
+                if(i != 0){
                     //一致する可能性がある
                     if(children[i].transform.tag == children[i - 1].transform.tag){
                         //一致した
@@ -196,13 +190,15 @@ public class TubeManager : MonoBehaviour
 
                         children[i-1].transform.localScale = tmpVec;
 
-                        Destroy(children[i].gameObject);
+                        Destroy(children[i].transform.gameObject);
                         Debug.Log($"{i}番目と{i-1}番目が一致したので、{i}番目を削除しました");
 
                         counter++;
+                        i++;
                     }
-                    i++;
+
                 }
+               
                 i++;
 
             }
